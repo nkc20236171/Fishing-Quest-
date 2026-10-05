@@ -1,6 +1,16 @@
 using TMPro;
 using UnityEngine;
-using UnityEngine.InputSystem;
+
+[System.Serializable]
+public class FishData
+{
+    public string fishName = "魚";
+    public float cursorSpeed = 1.5f;
+
+    [Range(0.05f, 1f)]
+    public float successZoneWidth = 0.2f;
+}
+
 public class FishingTimingGame : MonoBehaviour
 {
     [Header("UI")]
@@ -8,20 +18,25 @@ public class FishingTimingGame : MonoBehaviour
     [SerializeField] private RectTransform gaugeBackground;
     [SerializeField] private RectTransform successZone;
     [SerializeField] private RectTransform cursor;
+    [SerializeField] private TMP_Text statusText;
+    [SerializeField] private TMP_Text fishText;
     [SerializeField] private TMP_Text resultText;
 
-    [Header("Gauge")]
-    [SerializeField] private float cursorSpeed = 1.5f;
-    [SerializeField] private float successZoneCenter = 0.5f;
-    [SerializeField] private float successZoneWidth = 0.2f;
+    [Header("Fish")]
+    [SerializeField] private FishData[] fishes;
 
+    private FishData currentFish;
     private float cursorPosition;
+    private float cursorSpeed;
+    private float successZoneCenter;
+    private float successZoneWidth;
     private int cursorDirection = 1;
     private bool isFishing;
 
     void Start()
     {
         fishingPanel.SetActive(false);
+        statusText.text = "Fで釣りを始める";
     }
 
     void Update()
@@ -44,12 +59,28 @@ public class FishingTimingGame : MonoBehaviour
 
     public void StartFishing()
     {
+        if (fishes == null || fishes.Length == 0)
+        {
+            Debug.LogWarning("Fishの設定がありません。");
+            return;
+        }
+
+        currentFish = fishes[Random.Range(0, fishes.Length)];
+
+        cursorSpeed = currentFish.cursorSpeed;
+        successZoneWidth = currentFish.successZoneWidth;
+
+        float halfWidth = successZoneWidth / 2f;
+        successZoneCenter = Random.Range(halfWidth, 1f - halfWidth);
+
         cursorPosition = 0f;
         cursorDirection = 1;
         isFishing = true;
 
         fishingPanel.SetActive(true);
-        resultText.text = "Spaceで止める";
+        fishText.text = currentFish.fishName + "がかかった！";
+        resultText.text = "Spaceでタイミングよく止める";
+        statusText.text = "釣り中...";
 
         UpdateSuccessZoneUI();
         UpdateCursorUI();
@@ -78,7 +109,11 @@ public class FishingTimingGame : MonoBehaviour
 
         bool isSuccess = cursorPosition >= successMin && cursorPosition <= successMax;
 
-        resultText.text = isSuccess ? "釣り成功！" : "釣り失敗...";
+        resultText.text = isSuccess
+            ? currentFish.fishName + "を釣り上げた！"
+            : currentFish.fishName + "に逃げられた...";
+
+        statusText.text = "Fでもう一度釣る";
         isFishing = false;
     }
 
