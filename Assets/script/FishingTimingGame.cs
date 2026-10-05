@@ -2,6 +2,12 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
+public enum FishGimmick
+{
+    None,
+    MovingSuccessZone
+}
+
 [System.Serializable]
 public class FishData
 {
@@ -17,6 +23,12 @@ public class FishData
 
     [Range(0.05f, 1f)]
     public float successZoneWidth = 0.2f;
+
+    [Header("特殊ギミック")]
+    public FishGimmick gimmick = FishGimmick.None;
+
+    [Range(0f, 1f)]
+    public float successZoneMoveSpeed = 0.2f;
 
     [Header("報酬")]
     public string weaponName = "武器";
@@ -51,11 +63,18 @@ public class FishingTimingGame : MonoBehaviour
     private readonly HashSet<string> ownedWeapons = new HashSet<string>();
 
     private FishData currentFish;
+
     private float cursorPosition;
     private float cursorSpeed;
+    private int cursorDirection = 1;
+
     private float successZoneCenter;
     private float successZoneWidth;
-    private int cursorDirection = 1;
+    private int successZoneDirection = 1;
+
+    private FishGimmick currentGimmick;
+    private float successZoneMoveSpeed;
+
     private bool isFishing;
 
     private void Start()
@@ -71,7 +90,6 @@ public class FishingTimingGame : MonoBehaviour
             StartFishing();
         }
 
-        // 釣り終了後、素材が足りていればCキーで武器を作れる
         if (Input.GetKeyDown(KeyCode.C) && !isFishing && currentFish != null)
         {
             CraftWeapon(currentFish);
@@ -80,6 +98,13 @@ public class FishingTimingGame : MonoBehaviour
         if (!isFishing) return;
 
         MoveCursor();
+
+        if (currentGimmick == FishGimmick.MovingSuccessZone)
+        {
+            MoveSuccessZone();
+            UpdateSuccessZoneUI();
+        }
+
         UpdateCursorUI();
 
         if (Input.GetKeyDown(KeyCode.Space))
@@ -100,16 +125,26 @@ public class FishingTimingGame : MonoBehaviour
 
         cursorSpeed = currentFish.cursorSpeed;
         successZoneWidth = currentFish.successZoneWidth;
+        currentGimmick = currentFish.gimmick;
+        successZoneMoveSpeed = currentFish.successZoneMoveSpeed;
 
         float halfWidth = successZoneWidth / 2f;
         successZoneCenter = Random.Range(halfWidth, 1f - halfWidth);
 
         cursorPosition = 0f;
         cursorDirection = 1;
+        successZoneDirection = 1;
         isFishing = true;
 
         fishingPanel.SetActive(true);
+
         fishText.text = currentFish.rarity + "  " + currentFish.fishName + "がかかった！";
+
+        if (currentGimmick == FishGimmick.MovingSuccessZone)
+        {
+            fishText.text += "\n成功エリアが動く！";
+        }
+
         resultText.text = "Spaceでタイミングよく止める";
         statusText.text = "釣り中...";
 
@@ -155,6 +190,24 @@ public class FishingTimingGame : MonoBehaviour
         {
             cursorPosition = 0f;
             cursorDirection = 1;
+        }
+    }
+
+    private void MoveSuccessZone()
+    {
+        float halfWidth = successZoneWidth / 2f;
+
+        successZoneCenter += successZoneDirection * successZoneMoveSpeed * Time.deltaTime;
+
+        if (successZoneCenter >= 1f - halfWidth)
+        {
+            successZoneCenter = 1f - halfWidth;
+            successZoneDirection = -1;
+        }
+        else if (successZoneCenter <= halfWidth)
+        {
+            successZoneCenter = halfWidth;
+            successZoneDirection = 1;
         }
     }
 
@@ -232,7 +285,7 @@ public class FishingTimingGame : MonoBehaviour
 
         resultText.text =
             fish.materialName + "を" + fish.materialsRequiredForCraft + "個使った。\n" +
-            currentFish.weaponName + "を作った！";
+            fish.weaponName + "を作った！";
     }
 
     private void AddMaterial(string materialName, int amount)
@@ -247,7 +300,12 @@ public class FishingTimingGame : MonoBehaviour
 
     private int GetMaterialAmount(string materialName)
     {
-        return materials.ContainsKey(materialName) ? materials[materialName] : 0;
+        if (materials.ContainsKey(materialName))
+        {
+            return materials[materialName];
+        }
+
+        return 0;
     }
 
     private void UpdateCursorUI()

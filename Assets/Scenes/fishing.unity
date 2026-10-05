@@ -661,63 +661,75 @@ MonoBehaviour:
   resultText: {fileID: 147936931}
   fishes:
   - fishName: "\u30B3\u30A4"
-    rarity: Common
+    rarity: "\u30B3\u30E2\u30F3"
     spawnWeight: 40
     cursorSpeed: 1.2
     successZoneWidth: 0.35
+    gimmick: 0
+    successZoneMoveSpeed: 0
     weaponName: "\u30B3\u30A4\u306E\u6728\u5200"
     weaponDropChance: 0.15
     materialName: "\u30B3\u30A4\u306E\u30A6\u30ED\u30B3"
     materialAmount: 1
     materialsRequiredForCraft: 5
   - fishName: "\u30D6\u30E9\u30C3\u30AF\u30D0\u30B9"
-    rarity: Uncommon
+    rarity: "\u30A2\u30F3\u30B3\u30E2\u30F3"
     spawnWeight: 25
     cursorSpeed: 1.6
     successZoneWidth: 0.25
+    gimmick: 1
+    successZoneMoveSpeed: 0.2
     weaponName: "\u30D0\u30B9\u30C0\u30AC\u30FC"
     weaponDropChance: 0.12
     materialName: "\u30D0\u30B9\u306E\u7259"
     materialAmount: 1
     materialsRequiredForCraft: 6
-  - fishName: "\u30DE\u30B0\u30ED"
-    rarity: Legendary
-    spawnWeight: 3
-    cursorSpeed: 2.7
-    successZoneWidth: 0.1
-    weaponName: "\u30DE\u30B0\u30ED\u5927\u5263"
-    weaponDropChance: 0.05
-    materialName: "\u30DE\u30B0\u30ED\u306E\u30D2\u30EC"
-    materialAmount: 1
-    materialsRequiredForCraft: 8
   - fishName: "\u30A6\u30CA\u30AE"
-    rarity: Rare
+    rarity: "\u30EC\u30A2"
     spawnWeight: 15
     cursorSpeed: 2
     successZoneWidth: 0.18
+    gimmick: 0
+    successZoneMoveSpeed: 0
     weaponName: "\u96F7\u6483\u30E0\u30C1"
     weaponDropChance: 0.1
     materialName: "\u30A6\u30CA\u30AE\u306E\u767A\u96FB\u5668\u5B98"
     materialAmount: 1
     materialsRequiredForCraft: 7
   - fishName: "\u30D5\u30B0"
-    rarity: Rare
+    rarity: "\u30EC\u30A2"
     spawnWeight: 10
     cursorSpeed: 2.1
     successZoneWidth: 0.16
+    gimmick: 0
+    successZoneMoveSpeed: 0
     weaponName: "\u6BD2\u91DD\u30E9\u30F3\u30B9"
     weaponDropChance: 0.1
     materialName: "\u30D5\u30B0\u6BD2\u888B"
     materialAmount: 1
     materialsRequiredForCraft: 7
   - fishName: "\u91D1\u8272\u306E\u30B3\u30A4"
-    rarity: Epic
+    rarity: "\u30A8\u30D4\u30C3\u30AF"
     spawnWeight: 7
     cursorSpeed: 2.3
     successZoneWidth: 0.14
+    gimmick: 0
+    successZoneMoveSpeed: 0
     weaponName: "\u9EC4\u91D1\u306E\u5200"
     weaponDropChance: 0.08
     materialName: "\u9EC4\u91D1\u306E\u30A6\u30ED\u30B3"
+    materialAmount: 1
+    materialsRequiredForCraft: 8
+  - fishName: "\u30DE\u30B0\u30ED"
+    rarity: "\u30EC\u30B8\u30A7\u30F3\u30C0\u30EA\u30FC"
+    spawnWeight: 3
+    cursorSpeed: 2.7
+    successZoneWidth: 0.1
+    gimmick: 0
+    successZoneMoveSpeed: 0
+    weaponName: "\u30DE\u30B0\u30ED\u5927\u5263"
+    weaponDropChance: 0.05
+    materialName: "\u30DE\u30B0\u30ED\u306E\u30D2\u30EC"
     materialAmount: 1
     materialsRequiredForCraft: 8
 --- !u!4 &561937722
@@ -1202,7 +1214,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -191, y: 170}
+  m_AnchoredPosition: {x: -247, y: 198}
   m_SizeDelta: {x: 200, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &1882891624
@@ -1299,7 +1311,7 @@ MonoBehaviour:
   m_VertexBufferAutoSizeReduction: 0
   m_useMaxVisibleDescender: 1
   m_pageToDisplay: 1
-  m_margin: {x: 0, y: 0, z: -386.1322, w: 0}
+  m_margin: {x: 0, y: 0, z: -482.15637, w: 0}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
   m_hasFontAssetChanged: 0
