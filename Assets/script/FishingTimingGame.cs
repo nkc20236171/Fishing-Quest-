@@ -5,7 +5,9 @@ using UnityEngine;
 public enum FishGimmick
 {
     None,
-    MovingSuccessZone
+    MovingSuccessZone,
+    SpeedChange,
+    DangerZone
 }
 
 [System.Serializable]
@@ -30,6 +32,15 @@ public class FishData
     [Range(0f, 1f)]
     public float successZoneMoveSpeed = 0.2f;
 
+    [Min(1f)]
+    public float speedChangeMultiplier = 1.8f;
+
+    [Min(0.1f)]
+    public float speedChangeInterval = 1f;
+
+    [Range(0.05f, 1f)]
+    public float dangerZoneWidth = 0.2f;
+
     [Header("報酬")]
     public string weaponName = "武器";
 
@@ -51,6 +62,7 @@ public class FishingTimingGame : MonoBehaviour
     [SerializeField] private GameObject fishingPanel;
     [SerializeField] private RectTransform gaugeBackground;
     [SerializeField] private RectTransform successZone;
+    [SerializeField] private RectTransform dangerZone;
     [SerializeField] private RectTransform cursor;
     [SerializeField] private TMP_Text statusText;
     [SerializeField] private TMP_Text fishText;
@@ -66,14 +78,23 @@ public class FishingTimingGame : MonoBehaviour
 
     private float cursorPosition;
     private float cursorSpeed;
+    private float baseCursorSpeed;
     private int cursorDirection = 1;
 
     private float successZoneCenter;
     private float successZoneWidth;
     private int successZoneDirection = 1;
 
+    private float dangerZoneCenter;
+    private float dangerZoneWidth;
+
     private FishGimmick currentGimmick;
     private float successZoneMoveSpeed;
+
+    private float speedChangeMultiplier;
+    private float speedChangeInterval;
+    private float speedChangeTimer;
+    private bool isFastSpeed;
 
     private bool isFishing;
 
@@ -96,6 +117,11 @@ public class FishingTimingGame : MonoBehaviour
         }
 
         if (!isFishing) return;
+
+        if (currentGimmick == FishGimmick.SpeedChange)
+        {
+            UpdateSpeedChange();
+        }
 
         MoveCursor();
 
@@ -123,10 +149,19 @@ public class FishingTimingGame : MonoBehaviour
 
         currentFish = ChooseFishByWeight();
 
-        cursorSpeed = currentFish.cursorSpeed;
+        baseCursorSpeed = currentFish.cursorSpeed;
+        cursorSpeed = baseCursorSpeed;
+
         successZoneWidth = currentFish.successZoneWidth;
         currentGimmick = currentFish.gimmick;
         successZoneMoveSpeed = currentFish.successZoneMoveSpeed;
+
+        speedChangeMultiplier = currentFish.speedChangeMultiplier;
+        speedChangeInterval = currentFish.speedChangeInterval;
+        speedChangeTimer = 0f;
+        isFastSpeed = false;
+
+        dangerZoneWidth = currentFish.dangerZoneWidth;
 
         float halfWidth = successZoneWidth / 2f;
         successZoneCenter = Random.Range(halfWidth, 1f - halfWidth);
@@ -136,6 +171,17 @@ public class FishingTimingGame : MonoBehaviour
         successZoneDirection = 1;
         isFishing = true;
 
+        if (currentGimmick == FishGimmick.DangerZone)
+        {
+            dangerZoneCenter = GetDangerZoneCenter();
+            dangerZone.gameObject.SetActive(true);
+            UpdateDangerZoneUI();
+        }
+        else
+        {
+            dangerZone.gameObject.SetActive(false);
+        }
+
         fishingPanel.SetActive(true);
 
         fishText.text = currentFish.rarity + "  " + currentFish.fishName + "がかかった！";
@@ -143,6 +189,14 @@ public class FishingTimingGame : MonoBehaviour
         if (currentGimmick == FishGimmick.MovingSuccessZone)
         {
             fishText.text += "\n成功エリアが動く！";
+        }
+        else if (currentGimmick == FishGimmick.SpeedChange)
+        {
+            fishText.text += "\nカーソル速度が変化する！";
+        }
+        else if (currentGimmick == FishGimmick.DangerZone)
+        {
+            fishText.text += "\n赤いエリアは失敗！";
         }
 
         resultText.text = "Spaceでタイミングよく止める";
@@ -175,6 +229,20 @@ public class FishingTimingGame : MonoBehaviour
         }
 
         return fishes[0];
+    }
+
+    private void UpdateSpeedChange()
+    {
+        speedChangeTimer += Time.deltaTime;
+
+        if (speedChangeTimer < speedChangeInterval) return;
+
+        speedChangeTimer = 0f;
+        isFastSpeed = !isFastSpeed;
+
+        cursorSpeed = isFastSpeed
+            ? baseCursorSpeed * speedChangeMultiplier
+            : baseCursorSpeed;
     }
 
     private void MoveCursor()
@@ -211,12 +279,60 @@ public class FishingTimingGame : MonoBehaviour
         }
     }
 
+    private float GetDangerZoneCenter()
+    {
+        float successMin = successZoneCenter - successZoneWidth / 2f;
+        float successMax = successZoneCenter + successZoneWidth / 2f;
+        float halfDangerWidth = dangerZoneWidth / 2f;
+
+        float minCenter = halfDangerWidth;
+        float maxCenter = 1f - halfDangerWidth;
+
+        float leftMax = successMin - halfDangerWidth;
+        float rightMin = successMax + halfDangerWidth;
+
+        bool canPlaceLeft = leftMax >= minCenter;
+        bool canPlaceRight = rightMin <= maxCenter;
+
+        if (canPlaceLeft && canPlaceRight)
+        {
+            return Random.value < 0.5f
+                ? Random.Range(minCenter, leftMax)
+                : Random.Range(rightMin, maxCenter);
+        }
+
+        if (canPlaceLeft)
+        {
+            return Random.Range(minCenter, leftMax);
+        }
+
+        if (canPlaceRight)
+        {
+            return Random.Range(rightMin, maxCenter);
+        }
+
+        return minCenter;
+    }
+
     private void CheckResult()
     {
         float successMin = successZoneCenter - successZoneWidth / 2f;
         float successMax = successZoneCenter + successZoneWidth / 2f;
 
-        bool isSuccess = cursorPosition >= successMin && cursorPosition <= successMax;
+        bool isDanger = false;
+
+        if (currentGimmick == FishGimmick.DangerZone)
+        {
+            float dangerMin = dangerZoneCenter - dangerZoneWidth / 2f;
+            float dangerMax = dangerZoneCenter + dangerZoneWidth / 2f;
+
+            isDanger = cursorPosition >= dangerMin && cursorPosition <= dangerMax;
+        }
+
+        bool isSuccess =
+            !isDanger &&
+            cursorPosition >= successMin &&
+            cursorPosition <= successMax;
 
         if (isSuccess)
         {
@@ -224,7 +340,9 @@ public class FishingTimingGame : MonoBehaviour
         }
         else
         {
-            resultText.text = currentFish.fishName + "に逃げられた...";
+            resultText.text = isDanger
+                ? currentFish.fishName + "の危険な攻撃を受けた..."
+                : currentFish.fishName + "に逃げられた...";
         }
 
         statusText.text = "Fでもう一度釣る";
@@ -300,12 +418,7 @@ public class FishingTimingGame : MonoBehaviour
 
     private int GetMaterialAmount(string materialName)
     {
-        if (materials.ContainsKey(materialName))
-        {
-            return materials[materialName];
-        }
-
-        return 0;
+        return materials.ContainsKey(materialName) ? materials[materialName] : 0;
     }
 
     private void UpdateCursorUI()
@@ -324,5 +437,15 @@ public class FishingTimingGame : MonoBehaviour
 
         successZone.sizeDelta = new Vector2(zoneWidth, successZone.sizeDelta.y);
         successZone.anchoredPosition = new Vector2(x, successZone.anchoredPosition.y);
+    }
+
+    private void UpdateDangerZoneUI()
+    {
+        float gaugeWidth = gaugeBackground.rect.width;
+        float zoneWidth = gaugeWidth * dangerZoneWidth;
+        float x = Mathf.Lerp(-gaugeWidth / 2f, gaugeWidth / 2f, dangerZoneCenter);
+
+        dangerZone.sizeDelta = new Vector2(zoneWidth, dangerZone.sizeDelta.y);
+        dangerZone.anchoredPosition = new Vector2(x, dangerZone.anchoredPosition.y);
     }
 }
