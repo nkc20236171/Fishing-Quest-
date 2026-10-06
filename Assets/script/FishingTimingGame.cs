@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
 
 public enum FishGimmick
 {
@@ -106,34 +108,34 @@ public class FishingTimingGame : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.F) && !isFishing)
+        if (Keyboard.current == null)
         {
-            StartFishing();
+            return;
         }
 
-        if (Input.GetKeyDown(KeyCode.C) && !isFishing && currentFish != null)
+        // MでMapに戻る
+        if (Keyboard.current.mKey.wasPressedThisFrame)
         {
-            CraftWeapon(currentFish);
+            ReturnToMap();
+            return;
         }
 
-        if (!isFishing) return;
-
-        if (currentGimmick == FishGimmick.SpeedChange)
+        // 釣り開始
+        if (!isFishing)
         {
-            UpdateSpeedChange();
+            if (Keyboard.current.fKey.wasPressedThisFrame)
+            {
+                StartFishing();
+            }
+
+            return;
         }
 
+        // 釣り中
         MoveCursor();
-
-        if (currentGimmick == FishGimmick.MovingSuccessZone)
-        {
-            MoveSuccessZone();
-            UpdateSuccessZoneUI();
-        }
-
         UpdateCursorUI();
 
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (Keyboard.current.spaceKey.wasPressedThisFrame)
         {
             CheckResult();
         }
@@ -447,5 +449,21 @@ public class FishingTimingGame : MonoBehaviour
 
         dangerZone.sizeDelta = new Vector2(zoneWidth, dangerZone.sizeDelta.y);
         dangerZone.anchoredPosition = new Vector2(x, dangerZone.anchoredPosition.y);
+    }
+
+    private void ReturnToMap()
+    {
+        // 釣り場に入る前のMapへ戻る
+        if (!string.IsNullOrEmpty(FishingSceneData.ReturnSceneName))
+        {
+            SceneManager.LoadScene(
+                FishingSceneData.ReturnSceneName
+            );
+        }
+        else
+        {
+            // 念のため
+            SceneManager.LoadScene("Map");
+        }
     }
 }
