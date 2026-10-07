@@ -1,6 +1,8 @@
 using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
+
 
 public class PlayerController : MonoBehaviour
 {
@@ -13,31 +15,57 @@ public class PlayerController : MonoBehaviour
     private Rigidbody2D rb;
     private bool isMoving;
 
+    public static PlayerController Instance;
+
     private void Awake()
     {
+        if (Instance != null &&
+            Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+
+        Instance = this;
+
+        DontDestroyOnLoad(gameObject);
+
         rb = GetComponent<Rigidbody2D>();
 
-        // 開始位置をTilemapのマス中心に合わせる
-        Vector2 snappedPos = SnapToTileCenter(transform.position);
-        transform.position = snappedPos;
-        rb.position = snappedPos;
+        Vector2 snappedPos =
+            SnapToTileCenter(
+                transform.position
+            );
+
+        transform.position =
+            snappedPos;
+
+        rb.position =
+            snappedPos;
     }
 
     private void Update()
     {
-        // ステータス画面を開いている間は移動しない
+        // バトルシーンでは移動させない
+        if (SceneManager.GetActiveScene().name == "BattleScene")
+        {
+            return;
+        }
+
         if (StatusWindowController.IsOpen) return;
-        //ショップを開いている間は移動しない
         if (ShopController.IsOpen) return;
-        // 1マス移動中は次の入力を受け付けない
+        if (InnController.IsOpen) return;
+
         if (isMoving) return;
 
-        if (InnController.IsOpen) return;
-        Vector2 inputDirection = GetInputDirection();
+        Vector2 inputDirection =
+            GetInputDirection();
 
         if (inputDirection != Vector2.zero)
         {
-            StartCoroutine(MoveOneTile(inputDirection));
+            StartCoroutine(
+                MoveOneTile(inputDirection)
+            );
         }
     }
 

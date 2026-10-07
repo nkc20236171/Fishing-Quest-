@@ -30576,6 +30576,7 @@ GameObject:
   - component: {fileID: 1755049829}
   - component: {fileID: 1755049828}
   - component: {fileID: 1755049830}
+  - component: {fileID: 1755049837}
   - component: {fileID: 1755049831}
   - component: {fileID: 1755049832}
   - component: {fileID: 1755049834}
@@ -30804,6 +30805,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 874a26dead5813c4a8eccdaee780e1dc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FishingReturnPlayer
+--- !u!114 &1755049837
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1755049827}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e15a3b4609f11ae4ca3b1722c1653ae6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerSceneMover
 --- !u!1 &1784288911
 GameObject:
   m_ObjectHideFlags: 0

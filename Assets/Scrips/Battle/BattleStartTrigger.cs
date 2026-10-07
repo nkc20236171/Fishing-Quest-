@@ -12,25 +12,44 @@ public class BattleStartTrigger : MonoBehaviour
     private string battleSceneName =
         "BattleScene";
 
-    // 敵名
+
+    // -------------------------
+    // 敵ステータス
+    // -------------------------
+
     [SerializeField]
     private string enemyName =
         "スライム";
 
-    // HP
     [SerializeField]
     private int enemyMaxHp = 30;
 
-    // 攻撃力
     [SerializeField]
     private int enemyAttack = 5;
 
-    // ドロップ品
+
+    // -------------------------
+    // BattleScene用Prefab
+    // -------------------------
+
+    [SerializeField]
+    private GameObject battleEnemyPrefab;
+
+
+    // -------------------------
+    // ドロップ
+    // -------------------------
+
     [SerializeField]
     private MonsterDropEntry[] dropItems;
 
+
     private bool battleStarted;
 
+
+    // -------------------------
+    // EnemyID設定
+    // -------------------------
 
     public void SetEnemyId(
         string newEnemyId)
@@ -75,31 +94,45 @@ public class BattleStartTrigger : MonoBehaviour
 
         battleStarted = true;
 
+
+        // -------------------------
+        // 戻るシーン
+        // -------------------------
+
         BattleSceneData.ReturnSceneName =
             SceneManager
                 .GetActiveScene()
                 .name;
 
-        BattleSceneData
-            .ReturnPlayerPosition =
+
+        // -------------------------
+        // Player位置保存
+        // -------------------------
+
+        BattleSceneData.ReturnPlayerPosition =
             other.transform.position;
 
-        BattleSceneData
-            .HasReturnPlayerPosition =
+        BattleSceneData.HasReturnPlayerPosition =
             true;
+
+
+        // -------------------------
+        // カメラ位置保存
+        // -------------------------
 
         if (Camera.main != null)
         {
-            BattleSceneData
-                .ReturnCameraPosition =
-                Camera.main
-                    .transform
-                    .position;
+            BattleSceneData.ReturnCameraPosition =
+                Camera.main.transform.position;
 
-            BattleSceneData
-                .HasReturnCameraPosition =
+            BattleSceneData.HasReturnCameraPosition =
                 true;
         }
+
+
+        // -------------------------
+        // 敵情報
+        // -------------------------
 
         BattleSceneData.CurrentEnemyId =
             enemyId;
@@ -113,10 +146,21 @@ public class BattleStartTrigger : MonoBehaviour
         BattleSceneData.EnemyAttack =
             enemyAttack;
 
-        // ドロップ情報をBattleSceneへ
+
+        // BattleSceneで表示するPrefab
+        BattleSceneData.CurrentEnemyBattlePrefab =
+            battleEnemyPrefab;
+
+
+        // ドロップ情報
         BattleSceneData.SetDrops(
             dropItems
         );
+
+
+        // -------------------------
+        // BattleSceneへ
+        // -------------------------
 
         SceneManager.LoadScene(
             battleSceneName
